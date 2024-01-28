@@ -1,0 +1,61 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+model User {
+  id       Int      @id @default(autoincrement())
+  email    String   @unique
+  name     String?
+  password String
+  role     Role     @default(USER)
+  profile  Profile?
+  posts    Post[]
+}
+
+model Profile {
+  id     Int    @id @default(autoincrement())
+  bio    String
+  user   User   @relation(fields: [userId], references: [id])
+  userId Int    @unique @map("user_id")
+}
+
+model Post {
+  id             Int             @id @default(autoincrement())
+  title          String
+  published      Boolean         @default(false)
+  updateAt       DateTime        @updatedAt
+  createdAt      DateTime        @default(now())
+  author         User            @relation(fields: [authorId], references: [id])
+  authorId       Int             @map("author_id")
+  cotegory_posts Cotegory_post[]
+}
+
+model Cotegory_post {
+  id         Int      @id @default(autoincrement())
+  createAt   DateTime @default(now()) @map("create_at")
+  updateAt   DateTime @updatedAt @map("update_at")
+  post       Post     @relation(fields: [postId], references: [id])
+  postId     Int      @map("post_id")
+  category   Category @relation(fields: [categoryId], references: [id])
+  categoryId Int      @map("category_id")
+}
+
+model Category {
+  id             Int             @id @default(autoincrement())
+  name           String
+  cotegory_posts Cotegory_post[]
+}
+
